@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duragent</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <!-- Header -->
+  <header id="header">
+    <div id="connection-status">
+      <span id="status-dot"></span>
+      <span id="status-text">Connecting...</span>
+    </div>
+    <button id="settings-toggle" title="Settings">&#9881;</button>
+  </header>
+
+  <!-- Settings panel (hidden by default) -->
+  <div id="settings-panel" class="hidden">
+    <div class="settings-group">
+      <label for="duragent-url">Duragent URL</label>
+      <input type="text" id="duragent-url" placeholder="http://localhost:8080">
+    </div>
+    <div class="settings-group">
+      <label for="agent-select">Agent</label>
+      <select id="agent-select">
+        <option value="">Loading agents...</option>
+      </select>
+    </div>
+    <div class="settings-actions">
+      <button id="settings-save">Save</button>
+      <button id="new-session-btn">New Session</button>
+    </div>
+  </div>
+
+  <!-- Chat area -->
+  <div id="chat-container">
+    <div id="messages"></div>
+  </div>
+
+  <!-- Input area -->
+  <div id="input-area">
+    <textarea id="message-input" placeholder="Type a message..." rows="1"></textarea>
+    <button id="send-btn" title="Send">&#10148;</button>
+  </div>
+
+  <script src="duragent-client.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
