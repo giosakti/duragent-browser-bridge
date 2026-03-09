@@ -1,17 +1,6 @@
 // Duragent API client — routes all requests through the service worker to bypass CORS.
 
 class DuragentClient {
-  async #api(method, path, body) {
-    const res = await chrome.runtime.sendMessage({
-      type: "api",
-      method,
-      path,
-      body,
-    });
-    if (!res.ok) throw new Error(res.error);
-    return res.data;
-  }
-
   async checkHealth() {
     try {
       await this.#api("GET", "/readyz");
@@ -48,6 +37,30 @@ class DuragentClient {
     } catch {
       return [];
     }
+  }
+
+  async sendMessage(sessionId, content) {
+    let response = await this.#apiRaw(
+      "POST",
+      `/api/v1/sessions/${sessionId}/messages`,
+      { content }
+    );
+
+    // Auto-approve tool calls in a loop until we get a final response
+    while (response.status === 202) {
+      const pending = response.data;
+      response = await this.#apiRaw(
+        "POST",
+        `/api/v1/sessions/${sessionId}/approve`,
+        {
+          call_id: pending.call_id,
+          command: pending.command,
+          decision: "allow_once",
+        }
+      );
+    }
+
+    return response.data;
   }
 
   streamMessage(sessionId, content, callbacks) {
@@ -98,5 +111,29 @@ class DuragentClient {
         if (!settled) port.postMessage({ type: "abort" });
       },
     };
+  }
+
+  // --- Private helpers ---
+
+  async #api(method, path, body) {
+    const res = await chrome.runtime.sendMessage({
+      type: "api",
+      method,
+      path,
+      body,
+    });
+    if (!res.ok) throw new Error(res.error);
+    return res.data;
+  }
+
+  async #apiRaw(method, path, body) {
+    const res = await chrome.runtime.sendMessage({
+      type: "api",
+      method,
+      path,
+      body,
+    });
+    if (!res.ok) throw new Error(res.error);
+    return res;
   }
 }

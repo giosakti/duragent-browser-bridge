@@ -1,5 +1,8 @@
 // Service worker for Duragent Browser Bridge
 // All HTTP requests go through here to bypass CORS.
+// Browser bridge modules loaded below for CDP, snapshot, and RPC handling.
+
+importScripts("cdp.js", "snapshot.js", "rpc-handler.js");
 
 // --- Setup & event listeners ---
 
@@ -49,7 +52,7 @@ async function handleApiRequest({ method, path, body }) {
       const detail = isJson ? data?.detail : data;
       return { ok: false, status: res.status, error: detail || `HTTP ${res.status}` };
     }
-    return { ok: true, data };
+    return { ok: true, status: res.status, data };
   } catch (err) {
     return { ok: false, error: err.message };
   }
@@ -135,3 +138,7 @@ async function getBaseUrl() {
   const stored = await chrome.storage.local.get("duragentUrl");
   return (stored.duragentUrl || "http://localhost:8080").replace(/\/$/, "");
 }
+
+// --- Browser bridge ---
+
+connectBridge();

@@ -10,7 +10,7 @@ const DEFAULT_URL = "http://localhost:8080";
 
 let client = null;
 let sessionId = null;
-let activeStream = null;
+let sending = false;
 
 // --- DOM refs ---
 
@@ -147,7 +147,7 @@ async function loadHistory() {
 
 async function sendMessage() {
   const content = messageInput.value.trim();
-  if (!content || activeStream) return;
+  if (!content || sending) return;
 
   if (!sessionId) {
     const ok = await ensureSession();
@@ -159,38 +159,23 @@ async function sendMessage() {
   messageInput.style.height = "auto";
   scrollToBottom();
 
-  const assistantEl = addMessage("assistant", "");
-  let accumulated = "";
-
+  const thinkingEl = addSystemMessage("Thinking...");
   sendBtn.disabled = true;
+  sending = true;
 
-  activeStream = client.streamMessage(sessionId, content, {
-    onStart() {},
-
-    onToken(text) {
-      accumulated += text;
-      assistantEl.textContent = accumulated;
-      scrollToBottom();
-    },
-
-    onDone() {
-      activeStream = null;
-      sendBtn.disabled = false;
-      if (!accumulated) {
-        assistantEl.remove();
-      }
-    },
-
-    onError(message) {
-      activeStream = null;
-      sendBtn.disabled = false;
-      if (!accumulated) {
-        assistantEl.remove();
-      }
-      addSystemMessage(`Error: ${message}`);
-      scrollToBottom();
-    },
-  });
+  try {
+    const response = await client.sendMessage(sessionId, content);
+    thinkingEl.remove();
+    addMessage("assistant", response.content);
+    scrollToBottom();
+  } catch (err) {
+    thinkingEl.remove();
+    addSystemMessage(`Error: ${err.message}`);
+    scrollToBottom();
+  } finally {
+    sending = false;
+    sendBtn.disabled = false;
+  }
 }
 
 // --- DOM helpers ---
@@ -203,7 +188,11 @@ function setStatus(state, text) {
 function addMessage(role, content) {
   const el = document.createElement("div");
   el.className = `message ${role}`;
-  el.textContent = content;
+  if (role === "assistant") {
+    el.innerHTML = renderMarkdown(content);
+  } else {
+    el.textContent = content;
+  }
   messagesContainer.appendChild(el);
   return el;
 }

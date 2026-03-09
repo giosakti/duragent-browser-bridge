@@ -146,6 +146,56 @@ body {
   background: #f0f0f0;
   color: #1a1a1a;
   border-bottom-left-radius: 4px;
+  white-space: normal;
+}
+
+.message.assistant p {
+  margin: 0 0 8px 0;
+}
+
+.message.assistant p:last-child {
+  margin-bottom: 0;
+}
+
+.message.assistant code {
+  background: #e0e0e0;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.message.assistant pre {
+  background: #2d2d2d;
+  color: #f0f0f0;
+  padding: 8px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 4px 0;
+}
+
+.message.assistant pre code {
+  background: none;
+  padding: 0;
+  font-size: 12px;
+}
+
+.message.assistant ol,
+.message.assistant ul {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+
+.message.assistant li {
+  margin-bottom: 2px;
+}
+
+.message.assistant a {
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+.message.assistant a:hover {
+  text-decoration: underline;
 }
 
 .message.system {
